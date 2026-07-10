@@ -76,10 +76,14 @@ function lookup(fullId, requestedKind) {
   return null;
 }
 
-export async function OPTIONS() {
-  return new Response(null, {
-    headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, OPTIONS" },
-  });
+export async function OPTIONS(request) {
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+  };
+  const reqHeaders = request?.headers?.get("Access-Control-Request-Headers");
+  if (reqHeaders) headers["Access-Control-Allow-Headers"] = reqHeaders;
+  return new Response(null, { headers });
 }
 
 // GET /v1/models/info?id={alias}/{modelId} — metadata for a single model
