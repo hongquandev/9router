@@ -181,6 +181,10 @@ export const __test__ = {
 };
 
 export async function proxy(request) {
+  if (request.method === "OPTIONS") {
+    return NextResponse.next();
+  }
+
   const { pathname } = request.nextUrl;
 
   // Local-only gate for spawn-capable / host-secret routes.

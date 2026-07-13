@@ -35,9 +35,10 @@ vi.mock("@/lib/auth/dashboardSession", () => ({
 
 const { proxy, __test__ } = await import("../../src/dashboardGuard.js");
 
-function request(pathname, headers = {}) {
+function request(pathname, headers = {}, method = "POST") {
   const normalizedHeaders = new Headers(headers);
   return {
+    method,
     nextUrl: { pathname, searchParams: new URL(`http://localhost${pathname}`).searchParams },
     headers: normalizedHeaders,
     cookies: { get: vi.fn(() => undefined) },
@@ -185,6 +186,15 @@ describe("dashboard guard public LLM API access", () => {
 
     expect(response).toBe(mocks.nextResponse);
     expect(mocks.validateApiKey).toHaveBeenCalledWith("sk-valid");
+  });
+
+  it("allows remote OPTIONS request without API key (CORS preflight)", async () => {
+    const response = await proxy(request("/v1/chat/completions", {
+      host: "router.example.com",
+    }, "OPTIONS"));
+
+    expect(response).toBe(mocks.nextResponse);
+    expect(mocks.validateApiKey).not.toHaveBeenCalled();
   });
 });
 
